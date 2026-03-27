@@ -1,0 +1,177 @@
+{% import "/block/base.twig" as base %}
+
+{{ base.header('Gestão de Rankings', 'trophy') }}
+
+<div class="ui grid stackable">
+    
+    <div class="four wide column">
+        <div class="ui segment">
+            <h4 class="ui header"><i class="cogs icon"></i> Painel de Controle</h4>
+            
+            <div class="ui relaxed list">
+                <div class="item">
+                    <i class="sync alternate icon"></i>
+                    <div class="content">
+                        <div class="header">Ciclo Ativo</div>
+                        <div class="description">Semanal</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <i class="calendar check outline icon"></i>
+                    <div class="content">
+                        <div class="header">Último Reset</div>
+                        <div class="description">23/03/2026</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ui divider"></div>
+            
+            <button class="ui fluid button blue tiny" style="margin-bottom: 10px;">
+                <i class="exchange icon"></i> Mudar para Quinzenal
+            </button>
+            <button class="ui fluid button orange tiny" style="margin-bottom: 10px;">
+                <i class="history icon"></i> Adicionar Dias ao Ciclo
+            </button>
+            
+            <form method="POST" action="/dpanel/ranking/resetar" data-confirm="Tem certeza que deseja forçar o reset do ranking agora?">
+                <button type="submit" class="ui fluid button red tiny">
+                    <i class="trash alternate icon"></i> Forçar Reset
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="twelve wide column">
+        
+        <div class="ui top attached tabular menu">
+            <a class="item active" data-tab="tab-semanal">Semanal</a>
+            <a class="item" data-tab="tab-quinzenal">Quinzenal</a>
+            <a class="item" data-tab="tab-mensal">Mensal</a>
+        </div>
+
+        <div class="ui bottom attached tab segment active" data-tab="tab-semanal">
+            <table class="ui table striped selectable">
+                <thead>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Militar (Aplicador)</th>
+                        <th>Total de Aulas (Aprovadas)</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if ranking_completo_semanal is defined and ranking_completo_semanal|length > 0 %}
+                        {% for user in ranking_completo_semanal %}
+                            <tr>
+                                <td class="collapsing text-center">
+                                    {% if loop.index == 1 %}<h3 class="ui header yellow"><i class="trophy icon"></i> 1º</h3>
+                                    {% elseif loop.index == 2 %}<h3 class="ui header grey"><i class="trophy icon"></i> 2º</h3>
+                                    {% elseif loop.index == 3 %}<h3 class="ui header brown"><i class="trophy icon"></i> 3º</h3>
+                                    {% else %}<h4 class="ui header grey">{{ loop.index }}º</h4>{% endif %}
+                                </td>
+                                <td>
+                                    <h4 class="ui image header">
+                                        <img src="https://www.habbo.com.br/habbo-imaging/avatarimage?user={{ user.nick|url_encode }}&action=std&direction=6&head_direction=2&img_format=png&gesture=sml&headonly=1&size=s" class="ui mini rounded image">
+                                        <div class="content">
+                                            {{ user.nick }}
+                                        </div>
+                                    </h4>
+                                </td>
+                                <td><div class="ui label blue large">{{ user.total }}</div></td>
+                                <td class="collapsing">{{ base.button('buscar', '/busca?q=' ~ user.nick) }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="4" class="text-center">Nenhum dado registrado neste ciclo.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="ui bottom attached tab segment" data-tab="tab-quinzenal">
+            <table class="ui table striped selectable">
+                <thead>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Militar (Aplicador)</th>
+                        <th>Total de Aulas (Aprovadas)</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if ranking_completo_quinzenal is defined and ranking_completo_quinzenal|length > 0 %}
+                        {% for user in ranking_completo_quinzenal %}
+                            <tr>
+                                <td class="collapsing text-center">
+                                    {% if loop.index == 1 %}<h3 class="ui header yellow"><i class="trophy icon"></i> 1º</h3>
+                                    {% elseif loop.index == 2 %}<h3 class="ui header grey"><i class="trophy icon"></i> 2º</h3>
+                                    {% elseif loop.index == 3 %}<h3 class="ui header brown"><i class="trophy icon"></i> 3º</h3>
+                                    {% else %}<h4 class="ui header grey">{{ loop.index }}º</h4>{% endif %}
+                                </td>
+                                <td>
+                                    <h4 class="ui image header">
+                                        <img src="https://www.habbo.com.br/habbo-imaging/avatarimage?user={{ user.nick|url_encode }}&action=std&direction=6&head_direction=2&img_format=png&gesture=sml&headonly=1&size=s" class="ui mini rounded image">
+                                        <div class="content">
+                                            {{ user.nick }}
+                                        </div>
+                                    </h4>
+                                </td>
+                                <td><div class="ui label teal large">{{ user.total }}</div></td>
+                                <td class="collapsing">{{ base.button('buscar', '/busca?q=' ~ user.nick) }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="4" class="text-center">Nenhum dado registrado neste ciclo.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="ui bottom attached tab segment" data-tab="tab-mensal">
+            <table class="ui table striped selectable">
+                <thead>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Militar (Aplicador)</th>
+                        <th>Total de Aulas (Aprovadas)</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if ranking_completo_mensal is defined and ranking_completo_mensal|length > 0 %}
+                        {% for user in ranking_completo_mensal %}
+                            <tr>
+                                <td class="collapsing text-center">
+                                    {% if loop.index == 1 %}<h3 class="ui header yellow"><i class="trophy icon"></i> 1º</h3>
+                                    {% elseif loop.index == 2 %}<h3 class="ui header grey"><i class="trophy icon"></i> 2º</h3>
+                                    {% elseif loop.index == 3 %}<h3 class="ui header brown"><i class="trophy icon"></i> 3º</h3>
+                                    {% else %}<h4 class="ui header grey">{{ loop.index }}º</h4>{% endif %}
+                                </td>
+                                <td>
+                                    <h4 class="ui image header">
+                                        <img src="https://www.habbo.com.br/habbo-imaging/avatarimage?user={{ user.nick|url_encode }}&action=std&direction=6&head_direction=2&img_format=png&gesture=sml&headonly=1&size=s" class="ui mini rounded image">
+                                        <div class="content">
+                                            {{ user.nick }}
+                                        </div>
+                                    </h4>
+                                </td>
+                                <td><div class="ui label green large">{{ user.total }}</div></td>
+                                <td class="collapsing">{{ base.button('buscar', '/busca?q=' ~ user.nick) }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="4" class="text-center">Nenhum dado registrado neste ciclo.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.menu .item').tab();
+    });
+</script>

@@ -1,0 +1,320 @@
+{% import "/block/base.twig" as base %}
+
+{{ base.header('Painel de Liderança', 'cog') }}
+
+<style>
+    /* ==========================================================================
+       ESTILOS EXCLUSIVOS DO PAINEL DE CONFIGURAÇÕES
+       ========================================================================== */
+    .config-card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
+    .config-card h4 { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+    
+    .status-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 0.9em; }
+    .status-badge.active { background: #e6f4ea; color: #1e7e34; }
+    .status-badge.paused { background: #fff3cd; color: #856404; }
+    
+    .countdown-display { text-align: center; padding: 20px; background: linear-gradient(135deg, #5b7b8e, #496272); border-radius: 10px; color: #fff; margin: 15px 0; }
+    .countdown-display .time { font-size: 2.5em; font-weight: 700; }
+    .countdown-display .label { font-size: 0.9em; opacity: 0.9; }
+    
+    .history-item { padding: 15px; border: 1px solid #e8e8e8; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+    .history-item:hover { border-color: #2185d0; background: #f8f9fa; }
+    .history-item .period { font-weight: 700; color: #333; }
+    .history-item .date { font-size: 0.85em; color: #666; }
+    
+    .meta-card { background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 10px; }
+    .meta-card .value { font-size: 1.5em; font-weight: 700; color: #333; }
+    .meta-card .label { font-size: 0.85em; color: #666; }
+
+    /* ==========================================================================
+       DARK MODE
+       ========================================================================== */
+    body.dark .config-card { background: var(--secondary-dark-color); border-color: var(--primary-dark-color); box-shadow: none; }
+    body.dark .config-card h4 { border-bottom-color: var(--primary-dark-color); color: var(--four-dark-color); }
+    body.dark .history-item { border-color: var(--primary-dark-color); background: var(--third-dark-color); }
+    body.dark .history-item:hover { background: rgba(255,255,255,0.05); border-color: #3182ce; }
+    body.dark .history-item .period { color: #fff; }
+    body.dark .meta-card { background: var(--third-dark-color); border: 1px solid var(--primary-dark-color); }
+    body.dark .meta-card .value { color: #fff; }
+    body.dark .status-badge.active { background: rgba(30, 126, 52, 0.2); color: #4ade80; }
+</style>
+
+<div class="ui grid stackable">
+
+    <div class="twelve wide column">
+
+        <div class="config-card">
+            <h4 class="ui header">
+                <i class="info circle icon"></i>
+                <div class="content">Status do Período Atual</div>
+            </h4>
+
+            <div class="ui grid">
+                <div class="eight wide column">
+                    <p><b>Tipo de Período:</b> <span class="status-badge active"><i class="calendar icon"></i> {{ config.tipo_periodo|default('Semanal')|capitalize }}</span></p>
+                    <p><b>Início:</b> {{ config.data_inicio|default('27/01/2026') }}</p>
+                    <p><b>Término:</b> {{ config.data_termino|default('02/02/2026') }}</p>
+                    <p><b>Reset:</b> <span class="ui label green">{{ config.modo_reset|default('Automático')|capitalize }}</span></p>
+                </div>
+                <div class="eight wide column">
+                    <div class="countdown-display">
+                        <div class="label">Tempo restante para reset</div>
+                        <div class="time" id="countdown" data-termino="{{ config.data_termino_iso|default('2026-02-02T23:59:59') }}">--:--:--</div>
+                        <div class="label">O ranking será resetado {{ config.modo_reset|default('automaticamente')|lower }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="config-card">
+            <h4 class="ui header">
+                <i class="settings icon"></i>
+                <div class="content">Configurações do Período</div>
+            </h4>
+
+            <form class="ui form" method="POST" action="/lideranca/configuracoes/salvar_periodo">
+                <div class="two fields">
+                    <div class="field">
+                        <label>Tipo de Período</label>
+                        <select class="ui dropdown" name="config[tipo_periodo]" id="tipoPeriodo">
+                            <option value="semanal" {% if config.tipo_periodo == 'semanal' %}selected{% endif %}>Semanal (7 dias)</option>
+                            <option value="quinzenal" {% if config.tipo_periodo == 'quinzenal' %}selected{% endif %}>Quinzenal (15 dias)</option>
+                            <option value="mensal" {% if config.tipo_periodo == 'mensal' %}selected{% endif %}>Mensal (30 dias)</option>
+                            <option value="personalizado" {% if config.tipo_periodo == 'personalizado' %}selected{% endif %}>Personalizado</option>
+                        </select>
+                    </div>
+                    <div class="field" id="diasPersonalizado" style="{% if config.tipo_periodo != 'personalizado' %}display:none;{% endif %}">
+                        <label>Quantidade de Dias</label>
+                        <input type="number" name="config[dias_personalizado]" min="1" max="365" value="{{ config.dias_personalizado|default('7') }}" placeholder="Dias">
+                    </div>
+                </div>
+
+                <div class="two fields">
+                    <div class="field">
+                        <label>Modo de Reset</label>
+                        <select class="ui dropdown" name="config[modo_reset]" id="modoReset">
+                            <option value="automatico" {% if config.modo_reset == 'automatico' %}selected{% endif %}>Automático (no fim do período)</option>
+                            <option value="manual" {% if config.modo_reset == 'manual' %}selected{% endif %}>Manual (liderança decide)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Dia de Início (Para ciclos automáticos)</label>
+                        <select class="ui dropdown" name="config[dia_inicio]" id="diaInicio">
+                            <option value="1" {% if config.dia_inicio == '1' %}selected{% endif %}>Segunda-feira</option>
+                            <option value="0" {% if config.dia_inicio == '0' %}selected{% endif %}>Domingo</option>
+                            <option value="6" {% if config.dia_inicio == '6' %}selected{% endif %}>Sábado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="ui checkbox">
+                        <input type="checkbox" name="config[notificar_lideres]" value="1" {% if config.notificar_lideres %}checked{% endif %}>
+                        <label>Notificar líderes 24h antes do reset via System</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="ui checkbox">
+                        <input type="checkbox" name="config[salvar_historico]" value="1" {% if config.salvar_historico %}checked{% endif %}>
+                        <label>Salvar ranking no histórico antes de resetar (Recomendado)</label>
+                    </div>
+                </div>
+
+                <button class="ui primary button" type="submit">
+                    <i class="save icon"></i> Salvar Configurações
+                </button>
+            </form>
+        </div>
+
+        <div class="config-card">
+            <h4 class="ui header">
+                <i class="hand pointer icon"></i>
+                <div class="content">Ações Manuais</div>
+            </h4>
+
+            <div class="ui buttons">
+                <form method="POST" action="/lideranca/configuracoes/salvar_historico" style="display:inline;">
+                    <button class="ui button teal" type="submit">
+                        <i class="save icon"></i> Salvar Ranking Atual
+                    </button>
+                </form>
+                
+                <button class="ui button orange" id="btnResetarAgora">
+                    <i class="refresh icon"></i> Resetar Ranking Agora
+                </button>
+
+                <a href="/api/relatorios/exportar_ranking/csv" class="ui button blue">
+                    <i class="download icon"></i> Exportar CSV
+                </a>
+            </div>
+
+            <div class="ui warning message" style="margin-top: 15px;">
+                <i class="exclamation triangle icon"></i>
+                <b>Atenção:</b> O reset manual irá zerar todos os contadores da tabela oficial.
+            </div>
+        </div>
+
+        <div class="config-card">
+            <h4 class="ui header">
+                <i class="bullseye icon"></i>
+                <div class="content">Configuração de Metas Oficiais</div>
+            </h4>
+
+            <form class="ui form" method="POST" action="/lideranca/configuracoes/salvar_metas">
+                <div class="three fields">
+                    <div class="field">
+                        <label>Meta Semanal (mínimo de aulas)</label>
+                        <input type="number" name="metas[semanal]" value="{{ metas.semanal|default('5') }}" min="1">
+                    </div>
+                    <div class="field">
+                        <label>Meta Quinzenal</label>
+                        <input type="number" name="metas[quinzenal]" value="{{ metas.quinzenal|default('10') }}" min="1">
+                    </div>
+                    <div class="field">
+                        <label>Meta Mensal</label>
+                        <input type="number" name="metas[mensal]" value="{{ metas.mensal|default('20') }}" min="1">
+                    </div>
+                </div>
+
+                <button class="ui primary button" type="submit">
+                    <i class="save icon"></i> Salvar Metas
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <div class="four wide column">
+
+        <div class="ui vertical menu">
+            <div class="header item">Gestão de Liderança</div>
+            <a href="/lideranca/configuracoes" class="item active"><i class="cog icon"></i> Configurações</a>
+            <a href="/lideranca/ranking" class="item"><i class="trophy icon"></i> Ver Ranking Completo</a>
+            <a href="/lideranca/relatorios" class="item"><i class="chart bar icon"></i> Relatórios</a>
+        </div>
+
+        <div class="ui segment">
+            <h4 class="ui header">
+                <i class="chart line icon"></i>
+                <div class="content">Resumo Atual</div>
+            </h4>
+
+            <div class="meta-card">
+                <div class="value">{{ resumo.total_aulas|default('0') }}</div>
+                <div class="label">Total de Aulas Aplicadas</div>
+            </div>
+
+            <div class="meta-card">
+                <div class="value">{{ resumo.instrutores_ativos|default('0') }}</div>
+                <div class="label">Instrutores Ativos</div>
+            </div>
+
+            <div class="meta-card">
+                <div class="value">{{ resumo.atingiram_meta|default('0') }}/{{ resumo.instrutores_ativos|default('0') }}</div>
+                <div class="label">Atingiram a Meta</div>
+            </div>
+        </div>
+
+        <div class="ui segment">
+            <h4 class="ui header">
+                <i class="history icon"></i>
+                <div class="content">Últimos Ciclos</div>
+            </h4>
+
+            <div id="historicoList">
+                {% if historico is defined and historico|length > 0 %}
+                    {% for ciclo in historico|slice(0, 3) %}
+                        <div class="history-item btn-view-history" data-id="{{ ciclo.id }}" data-nome="{{ ciclo.nome }}" data-aulas="{{ ciclo.total_aulas }}">
+                            <div class="period"><i class="calendar icon"></i> {{ ciclo.nome }}</div>
+                            <div class="date">{{ ciclo.data_inicio }} - {{ ciclo.data_termino }}</div>
+                            <span class="ui label mini blue">{{ ciclo.total_aulas }} aulas</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ui placeholder segment basic text-center" style="box-shadow: none; border: none; padding: 10px;">
+                        Nenhum histórico salvo.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="ui modal mini" id="modalReset">
+    <div class="header">
+        <i class="exclamation triangle icon red"></i> Confirmar Reset
+    </div>
+    <div class="content">
+        <p>Tem certeza que deseja <b>resetar o ranking oficial</b> agora?</p>
+        <p>Esta ação irá arquivar o ciclo atual e zerar todos os contadores da tabela de aulas ativas.</p>
+        
+        <form method="POST" action="/lideranca/configuracoes/forcar_reset" id="formResetManual" class="ui form">
+            <div class="field">
+                <div class="ui checkbox">
+                    <input type="checkbox" name="salvar_historico" id="salvarAntesReset" value="1" checked>
+                    <label>Salvar ranking atual no histórico antes de resetar</label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="actions">
+        <button class="ui cancel button">Cancelar</button>
+        <button class="ui red button" onclick="$('#formResetManual').submit();">
+            <i class="refresh icon"></i> Executar Reset
+        </button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+        // 1. Inicialização de Componentes Semantic UI
+        $('.ui.dropdown').dropdown();
+        $('.ui.checkbox').checkbox();
+
+        // 2. Lógica de exibição do Período Personalizado
+        $('#tipoPeriodo').on('change', function () {
+            if ($(this).val() === 'personalizado') {
+                $('#diasPersonalizado').slideDown();
+            } else {
+                $('#diasPersonalizado').slideUp();
+            }
+        });
+
+        // 3. Modal de Reset Manual
+        $('#btnResetarAgora').on('click', function (e) {
+            e.preventDefault();
+            $('#modalReset').modal({
+                closable: false,
+                blurring: true
+            }).modal('show');
+        });
+
+        // 4. Contador Regressivo Real (Lê a data do atributo 'data-termino')
+        function updateCountdown() {
+            var targetIso = $('#countdown').data('termino');
+            if(!targetIso) return;
+            
+            var target = new Date(targetIso);
+            var now = new Date();
+            var diff = target - now;
+
+            if (diff <= 0) {
+                $('#countdown').text('Reset Pendente');
+                return;
+            }
+
+            var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            $('#countdown').text(days + 'd ' + hours + 'h ' + minutes + 'm');
+        }
+        
+        updateCountdown();
+        setInterval(updateCountdown, 60000); // Atualiza a cada 1 minuto
+    });
+</script>

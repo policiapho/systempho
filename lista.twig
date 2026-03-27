@@ -1,0 +1,98 @@
+{% import "/block/base.twig" as base %}
+
+<div class="ui grid stackable">
+    
+    <div class="four wide column">
+        
+        <div class="ui vertical menu">
+            <div class="item">
+                <form>
+                    <div class="ui transparent icon input">
+                        <input type="hidden" name="filtro" value="todas">
+                        <input type="text" name="filtro[q]" placeholder="Digite a ID da aula">
+                        <i class="search icon"></i>
+                    </div>
+                </form>
+            </div>
+            <a class="item" href="{{ link }}/aplicar">Aplicar Aula</a>
+            <a class="item" href="{{ link }}?filtro[lista]=minhas">Minhas Aulas</a>
+        </div>
+
+        <div class="ui segment ranking-widget">
+            <h4 class="ui header panel-title">
+                <i class="calendar alternate outline icon blue"></i>
+                <div class="content">
+                    Ranking Semanal
+                    <div class="sub header">Top 5 da Semana</div>
+                </div>
+            </h4>
+
+            <div class="rw-list">
+                {% if ranking_semanal is defined and ranking_semanal|length > 0 %}
+                    {% for instrutor in ranking_semanal|slice(0, 15) %}
+                        <div class="rw-item">
+                            <div class="rw-avatar">
+                                <img src="https://www.habbo.com.br/habbo-imaging/avatarimage?user={{ instrutor.nick|url_encode }}&action=std&direction=6&head_direction=2&img_format=png&gesture=sml&headonly=1&size=b" alt="{{ instrutor.nick }}">
+                            </div>
+                            <div class="rw-medal">
+                                {% if loop.index == 1 %}
+                                    <i class="trophy icon yellow"></i>
+                                {% elseif loop.index == 2 %}
+                                    <i class="trophy icon grey"></i>
+                                {% elseif loop.index == 3 %}
+                                    <i class="trophy icon brown"></i>
+                                {% else %}
+                                    #{{ loop.index }}
+                                {% endif %}
+                            </div>
+                            <div class="rw-nick" title="{{ instrutor.nick }}">{{ instrutor.nick }}</div>
+                            <div class="rw-score"><span class="ui label blue">{{ instrutor.total }}</span></div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ui placeholder segment basic center aligned" style="padding: 15px 0; border: none; box-shadow: none;">
+                        <p style="font-size: 0.85em; color: #a0aec0; margin: 0;">Nenhuma aula registrada nesta semana.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="ui segment ranking-widget">
+            <h4 class="ui header panel-title">
+                <i class="trophy icon green"></i>
+                <div class="content">
+                    Ranking Mensal
+                    <div class="sub header">Top 5 do Mês</div>
+                </div>
+            </h4>
+
+            <div class="rw-list">
+                {% if ranking_mensal is defined and ranking_mensal|length > 0 %}
+                    {% for instrutor in ranking_mensal|slice(0, 15) %}
+                        <div class="rw-item">
+                            <div class="rw-avatar">
+                                <img src="https://www.habbo.com.br/habbo-imaging/avatarimage?user={{ instrutor.nick|url_encode }}&action=std&direction=6&head_direction=2&img_format=png&gesture=sml&headonly=1&size=b" alt="{{ instrutor.nick }}">
+                            </div>
+                            <div class="rw-medal">
+                                {% if loop.index == 1 %}
+                                    <i class="trophy icon yellow"></i>
+                                {% elseif loop.index == 2 %}
+                                    <i class="trophy icon grey"></i>
+                                {% elseif loop.index == 3 %}
+                                    <i class="trophy icon brown"></i>
+                                {% else %}
+                                    #{{ loop.index }}
+                                {% endif %}
+                            </div>
+                            <div class="rw-nick" title="{{ instrutor.nick }}">{{ instrutor.nick }}</div>
+                            <div class="rw-score"><span class="ui label teal">{{ instrutor.total }}</span></div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ui placeholder segment basic center aligned" style="padding: 15px 0; border: none; box-shadow: none;">
+                        <p style="font-size: 0.85em; color: #a0aec0; margin: 0;">Nenhuma aula registrada neste mês.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>

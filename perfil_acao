@@ -1,0 +1,6 @@
+<div class="actions">
+    <a href="/promocao/aplicar?user=" class="ui tiny green button"><i class="angle double up icon"></i> Promover</a>
+    <a href="/rebaixamento/aplicar?user=" class="ui tiny black button"><i class="angle double down icon"></i> Rebaixar</a>
+    <a href="/advertencia/aplicar?user=" class="ui tiny orange button"><i class="exclamation triangle icon"></i> Advertir</a>
+    <a href="/demissao/aplicar?user=" class="ui tiny red button"><i class="times icon"></i> Demitir</a>
+</div>

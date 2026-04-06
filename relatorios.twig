@@ -3,7 +3,6 @@
 {{ base.header('Relatórios e Análises', 'chart bar') }}
 
 <style>
-    /* Estilos Locais Exclusivos dos Relatórios */
     .report-card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .report-card h4 { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
     
@@ -29,7 +28,6 @@
     .stat-box { background: #fff; border-radius: 8px; padding: 20px; text-align: center; border: 1px solid #e1e4e8; }
     .stat-box .value { font-size: 1.8em; font-weight: 700; color: #333; margin: 10px 0 5px; }
 
-    /* Adaptação Dark Mode */
     body.dark .report-card, body.dark .stat-box { background: var(--secondary-dark-color); border-color: var(--primary-dark-color); }
     body.dark .report-card h4, body.dark .aula-item { border-color: var(--primary-dark-color); }
     body.dark .compare-period.left { background: rgba(33, 133, 208, 0.1); }
@@ -37,7 +35,6 @@
     body.dark .stat-box .value, body.dark .aula-info .instrutor { color: #fff; }
 </style>
 
-<!-- Estatísticas Rápidas -->
 <div class="stats-grid">
     <div class="stat-box">
         <div class="icon"><i class="book icon blue"></i></div>
@@ -66,7 +63,6 @@
     <!-- Coluna Principal -->
     <div class="twelve wide column">
 
-        <!-- 1. COMPARATIVO ENTRE PERÍODOS -->
         <div class="report-card">
             <h4 class="ui header">
                 <i class="exchange icon"></i>
@@ -108,7 +104,6 @@
             </table>
         </div>
 
-        <!-- 2. HISTÓRICO RECENTE DE AULAS -->
         <div class="report-card">
             <h4 class="ui header">
                 <i class="history icon"></i>
@@ -138,7 +133,6 @@
 
     </div>
 
-    <!-- Coluna Lateral -->
     <div class="four wide column">
 
         <!-- Menu DPanel -->
@@ -149,7 +143,6 @@
             <a href="/lideranca/relatorios" class="item active"><i class="chart bar icon"></i> Relatórios</a>
         </div>
 
-        <!-- Top 5 do Mês (Reutilizando a variável ranking_mensal) -->
         <div class="ui segment ranking-widget">
             <h4 class="ui header panel-title">
                 <i class="trophy icon yellow"></i>
@@ -181,7 +174,6 @@
             </div>
         </div>
 
-        <!-- Exportação -->
         <div class="ui segment">
             <h4 class="ui header"><i class="download icon"></i> Exportar Dados</h4>
             <a href="/api/relatorios/exportar/csv" class="ui fluid button blue tiny" style="margin-bottom: 8px;"><i class="file excel icon"></i> Exportar CSV</a>

@@ -3,9 +3,6 @@
 {{ base.header('Painel de Liderança', 'cog') }}
 
 <style>
-    /* ==========================================================================
-       ESTILOS EXCLUSIVOS DO PAINEL DE CONFIGURAÇÕES
-       ========================================================================== */
     .config-card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
     .config-card h4 { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
     
@@ -26,9 +23,6 @@
     .meta-card .value { font-size: 1.5em; font-weight: 700; color: #333; }
     .meta-card .label { font-size: 0.85em; color: #666; }
 
-    /* ==========================================================================
-       DARK MODE
-       ========================================================================== */
     body.dark .config-card { background: var(--secondary-dark-color); border-color: var(--primary-dark-color); box-shadow: none; }
     body.dark .config-card h4 { border-bottom-color: var(--primary-dark-color); color: var(--four-dark-color); }
     body.dark .history-item { border-color: var(--primary-dark-color); background: var(--third-dark-color); }
@@ -271,11 +265,9 @@
 <script type="text/javascript">
     $(document).ready(function () {
         
-        // 1. Inicialização de Componentes Semantic UI
         $('.ui.dropdown').dropdown();
         $('.ui.checkbox').checkbox();
 
-        // 2. Lógica de exibição do Período Personalizado
         $('#tipoPeriodo').on('change', function () {
             if ($(this).val() === 'personalizado') {
                 $('#diasPersonalizado').slideDown();
@@ -284,7 +276,6 @@
             }
         });
 
-        // 3. Modal de Reset Manual
         $('#btnResetarAgora').on('click', function (e) {
             e.preventDefault();
             $('#modalReset').modal({
@@ -293,7 +284,6 @@
             }).modal('show');
         });
 
-        // 4. Contador Regressivo Real (Lê a data do atributo 'data-termino')
         function updateCountdown() {
             var targetIso = $('#countdown').data('termino');
             if(!targetIso) return;
@@ -315,6 +305,6 @@
         }
         
         updateCountdown();
-        setInterval(updateCountdown, 60000); // Atualiza a cada 1 minuto
+        setInterval(updateCountdown, 60000);
     });
 </script>
